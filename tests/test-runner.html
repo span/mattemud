@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatteMUD - Tester</title>
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #00ff88;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { color: #00ff88; }
+    .pass { color: #00ff88; }
+    .fail { color: #ff5555; }
+    .section { margin: 20px 0; padding: 10px; border-left: 3px solid #333; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>MatteMUD - Tester</h1>
+  <div id="results"></div>
+
+  <!-- Load game scripts -->
+  <script src="../js/core/colors.js"></script>
+  <script src="../js/core/Player.js"></script>
+  <script src="../js/core/World.js"></script>
+  <script src="../js/core/ChallengeGenerator.js"></script>
+  <script src="../js/core/MathBeast.js"></script>
+  <script src="../js/core/GameEngine.js"></script>
+
+  <script>
+    const results = document.getElementById('results');
+    let passed = 0;
+    let failed = 0;
+
+    function log(text, className = '') {
+      const div = document.createElement('div');
+      div.className = className;
+      div.textContent = text;
+      results.appendChild(div);
+    }
+
+    function section(name) {
+      const div = document.createElement('div');
+      div.className = 'section';
+      div.innerHTML = `<strong>📦 ${name}</strong>`;
+      results.appendChild(div);
+    }
+
+    function test(name, fn) {
+      try {
+        fn();
+        passed++;
+        log(`  ✅ ${name}`, 'pass');
+      } catch (e) {
+        failed++;
+        log(`  ❌ ${name}: ${e.message}`, 'fail');
+      }
+    }
+
+    function assertEqual(actual, expected) {
+      if (actual !== expected) {
+        throw new Error(`Expected ${expected}, got ${actual}`);
+      }
+    }
+
+    function assertTrue(value) {
+      if (!value) throw new Error(`Expected true, got ${value}`);
+    }
+
+    function assertFalse(value) {
+      if (value) throw new Error(`Expected false, got ${value}`);
+    }
+
+    // Player Tests
+    section('Player');
+
+    test('skapar spelare med rätt startvärden', () => {
+      const p = new Player('Test');
+      assertEqual(p.name, 'Test');
+      assertEqual(p.level, 1);
+      assertEqual(p.xp, 0);
+      assertEqual(p.hp, 100);
+    });
+
+    test('addXp returnerar true vid level up', () => {
+      const p = new Player('Test');
+      assertTrue(p.addXp(100));
+      assertEqual(p.level, 2);
+    });
+
+    test('ökar maxHp vid level up', () => {
+      const p = new Player('Test');
+      p.addXp(100);
+      assertEqual(p.maxHp, 110);
+    });
+
+    test('hasItem fungerar case-insensitive', () => {
+      const p = new Player('Test');
+      p.addItem('Gyllene Nyckel');
+      assertTrue(p.hasItem('nyckel'));
+      assertTrue(p.hasItem('GYLLENE'));
+    });
+
+    test('removeItem tar bort föremål', () => {
+      const p = new Player('Test');
+      p.addItem('Svärd');
+      assertTrue(p.removeItem('svärd'));
+      assertFalse(p.hasItem('svärd'));
+    });
+
+    test('heal begränsas av maxHp', () => {
+      const p = new Player('Test');
+      p.hp = 90;
+      p.heal(50);
+      assertEqual(p.hp, 100);
+    });
+
+    test('toJSON och fromJSON bevarar data', () => {
+      const p = new Player('Hero');
+      p.addXp(150);
+      p.addItem('Potion');
+      const loaded = Player.fromJSON(p.toJSON());
+      assertEqual(loaded.name, 'Hero');
+      assertEqual(loaded.xp, 150);
+      assertTrue(loaded.hasItem('potion'));
+    });
+
+    // ChallengeGenerator Tests
+    section('ChallengeGenerator');
+
+    test('genererar MathProblem', () => {
+      const gen = new ChallengeGenerator();
+      const problem = gen.generate('tutorial', 1);
+      assertTrue(problem instanceof MathProblem);
+      assertTrue(problem.question.length > 0);
+    });
+
+    test('tutorial har rätt svar', () => {
+      const gen = new ChallengeGenerator();
+      for (let i = 0; i < 10; i++) {
+        const p = gen.generate('tutorial', 1);
+        const match = p.question.match(/(\d+)\s*\+\s*(\d+)/);
+        if (match) {
+          assertEqual(p.answer, String(parseInt(match[1]) + parseInt(match[2])));
+        }
+      }
+    });
+
+    test('multiplikation har rätt svar', () => {
+      const gen = new ChallengeGenerator();
+      for (let i = 0; i < 10; i++) {
+        const p = gen.generate('multiplication', 1);
+        const match = p.question.match(/(\d+)\s*×\s*(\d+)/);
+        if (match) {
+          assertEqual(p.answer, String(parseInt(match[1]) * parseInt(match[2])));
+        }
+      }
+    });
+
+    test('division utan rest har rätt svar', () => {
+      const gen = new ChallengeGenerator();
+      for (let i = 0; i < 10; i++) {
+        const p = gen.generate('division', 1);
+        const match = p.question.match(/(\d+)\s*÷\s*(\d+)/);
+        if (match) {
+          assertEqual(p.answer, String(Math.floor(parseInt(match[1]) / parseInt(match[2]))));
+        }
+      }
+    });
+
+    // MathBeast Tests
+    section('MathBeast');
+
+    test('shouldAppear returnerar true efter 2 fel', () => {
+      const mb = new MathBeast();
+      assertFalse(mb.shouldAppear(1));
+      assertTrue(mb.shouldAppear(2));
+    });
+
+    test('isActive är false initialt', () => {
+      const mb = new MathBeast();
+      assertFalse(mb.isActive());
+    });
+
+    test('appear aktiverar beast', () => {
+      const mb = new MathBeast();
+      const problem = new MathProblem({
+        question: 'Test?',
+        answer: '42',
+        category: 'tutorial',
+        difficulty: 1,
+        methodExplanation: 'Test'
+      });
+      mb.appear(problem);
+      assertTrue(mb.isActive());
+    });
+
+    // Summary
+    const summary = document.createElement('div');
+    summary.style.marginTop = '30px';
+    summary.style.padding = '20px';
+    summary.style.borderTop = '2px solid #333';
+    summary.innerHTML = `
+      <h2>Sammanfattning</h2>
+      <p class="pass">✅ Godkända: ${passed}</p>
+      <p class="fail">❌ Misslyckade: ${failed}</p>
+      <p>${failed === 0 ? '🎉 Alla tester godkända!' : '⚠️ Några tester misslyckades'}</p>
+    `;
+    results.appendChild(summary);
+  </script>
+</body>
+</html>

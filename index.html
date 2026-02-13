@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatteMUD - Matematikäventyret</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-container">
+    <div id="terminal"></div>
+    <footer>
+      <span>Skriv <code>hjälp</code> för kommandon</span>
+    </footer>
+  </div>
+
+  <!-- xterm.js -->
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+
+  <!-- Game scripts - load in order -->
+  <script src="js/core/colors.js"></script>
+  <script src="js/core/Player.js"></script>
+  <script src="js/core/World.js"></script>
+  <script src="js/core/ChallengeGenerator.js"></script>
+  <script src="js/core/MathBeast.js"></script>
+  <script src="js/core/GameEngine.js"></script>
+  <script src="js/data/worldData.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
