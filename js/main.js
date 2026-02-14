@@ -185,7 +185,66 @@ class TerminalUI {
   }
 
   writeLine(text) {
-    this.write(text + '\n');
+    const cols = this.term ? this.term.cols : 80;
+    this.write(this._wordWrap(text, cols) + '\n');
+  }
+
+  // Radbryt text vid ordgränser, ignorera ANSI-koder vid breddmätning
+  _wordWrap(text, cols) {
+    return text.split('\n').map(line => this._wrapLine(line, cols)).join('\n');
+  }
+
+  _wrapLine(line, cols) {
+    // Mät synlig längd (utan ANSI-koder)
+    const visLen = (s) => s.replace(/\x1b\[[0-9;]*m/g, '').length;
+
+    if (visLen(line) <= cols) return line;
+
+    // Dela vid ordgränser men behåll ANSI-koder intakta
+    const tokens = line.match(/(\x1b\[[0-9;]*m)|(\S+)|(\s+)/g) || [];
+    const lines = [];
+    let current = '';
+    let currentLen = 0;
+
+    for (const token of tokens) {
+      const tokenVisLen = visLen(token);
+
+      // ANSI-koder tar ingen plats
+      if (tokenVisLen === 0) {
+        current += token;
+        continue;
+      }
+
+      // Whitespace
+      if (/^\s+$/.test(token)) {
+        if (currentLen + tokenVisLen <= cols) {
+          current += token;
+          currentLen += tokenVisLen;
+        }
+        continue;
+      }
+
+      // Ord som inte ryms på raden
+      if (currentLen + tokenVisLen > cols) {
+        if (currentLen > 0) {
+          lines.push(current);
+          current = '';
+          currentLen = 0;
+        }
+        // Riktigt långa ord som inte ryms alls — låt terminalen bryta dem
+        if (tokenVisLen > cols) {
+          current += token;
+          currentLen += tokenVisLen;
+          continue;
+        }
+      }
+
+      current += token;
+      currentLen += tokenVisLen;
+    }
+
+    if (current) lines.push(current);
+    return lines.join('\n');
   }
 
   showPrompt() {
