@@ -39,6 +39,10 @@ class Room {
 }
 
 class World {
+  static DIR_SHORTCUTS = {
+    'norr': 'n', 'söder': 's', 'öster': 'ö', 'väster': 'v'
+  };
+
   constructor() {
     this.rooms = new Map();
     this.visitedRooms = new Set();
@@ -111,7 +115,11 @@ class World {
     const exits = Object.keys(room.exits);
     if (exits.length > 0) {
       lines.push('');
-      lines.push(`${Colors.CYAN}Utgångar: ${exits.join(', ')}${Colors.RESET}`);
+      const showShortcuts = room.id.startsWith('akademin_');
+      const exitLabels = showShortcuts
+        ? exits.map(e => `${e} (${World.DIR_SHORTCUTS[e]})`)
+        : exits;
+      lines.push(`${Colors.CYAN}Utgångar: ${exitLabels.join(', ')}${Colors.RESET}`);
     }
 
     return lines.join('\n');
