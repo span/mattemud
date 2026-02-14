@@ -35,7 +35,6 @@ class TerminalUI {
     this.fitAddon = null;
     this.inputBuffer = '';
     this.onCommand = null;
-    this.isShortcutMode = false;
     this._resizeObserver = null;
     this._resizeTimeout = null;
     this._history = [];
@@ -141,14 +140,6 @@ class TerminalUI {
     // Ignorera övriga escape-sekvenser
     if (data.startsWith('\x1b')) return;
 
-    // Navigation shortcuts: single keypress when buffer is empty
-    const NAV_KEYS = { 'n': 'n', 's': 's', 'ö': 'ö', 'v': 'v' };
-    if (this.inputBuffer === '' && NAV_KEYS[data] && this.isShortcutMode) {
-      this.term.write(data + '\r\n');
-      if (this.onCommand) this.onCommand(data);
-      return;
-    }
-
     if (data >= ' ' && data.length === 1) {
       if (this.inputBuffer.length >= GameConstants.MAX_INPUT_LENGTH) return;
       this.inputBuffer += data;
@@ -237,8 +228,21 @@ function initGame(playerName) {
 
   const player = new Player(playerName);
 
+  const statusBar = document.getElementById('status-bar');
+
   engine = new GameEngine(world, player, {
     output: (text) => terminal.writeLine(text),
+    onStatusUpdate: (p) => {
+      const xpTarget = p.getXpTargetForNextLevel();
+      const calcInfo = p.calculators > 0 ? `<span class="stat">🔢 Dosor: ${p.calculators}</span>` : '';
+      statusBar.innerHTML =
+        `<span class="stat">📊 Nivå ${p.level}</span>` +
+        `<span class="stat">❤️ HP: ${p.hp}/${p.maxHp}</span>` +
+        `<span class="stat">⚡ XP: ${p.xp}/${xpTarget}</span>` +
+        `<span class="stat">💰 Guld: ${p.gold}</span>` +
+        calcInfo;
+      statusBar.style.display = 'block';
+    },
     onSave: (data) => Storage.save(data),
     onLoad: () => Storage.load(),
     onQuit: () => {
@@ -249,14 +253,12 @@ function initGame(playerName) {
 
   terminal.onCommand = (command) => {
     engine.processCommand(command);
-    terminal.isShortcutMode = engine.running && !engine.inChallengeMode && !engine.mathBeast?.isActive();
     if (engine.running) {
       terminal.showPrompt();
     }
   };
 
   engine.start();
-  terminal.isShortcutMode = true;
   terminal.showPrompt();
 }
 

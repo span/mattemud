@@ -45,6 +45,7 @@ class GameEngine {
     this._pendingAction = null;
 
     this.output = options.output || console.log;
+    this.onStatusUpdate = options.onStatusUpdate || (() => {});
     this.onSave = options.onSave || (() => {});
     this.onLoad = options.onLoad || (() => null);
     this.onQuit = options.onQuit || (() => {});
@@ -124,13 +125,7 @@ class GameEngine {
   }
 
   _showStatusBar() {
-    const p = this.player;
-    const xpTarget = p.getXpTargetForNextLevel();
-    const bar = '━'.repeat(50);
-    this.print(`\n${Colors.DIM}${bar}${Colors.RESET}`);
-    const calcInfo = p.calculators > 0 ? `  🔢 Dosor: ${p.calculators}` : '';
-    this.print(`${Colors.CYAN}⚡ XP: ${p.xp}/${xpTarget}  💰 Guld: ${p.gold}  ❤️ HP: ${p.hp}/${p.maxHp}  📊 Nivå ${p.level}${calcInfo}${Colors.RESET}`);
-    this.print(`${Colors.DIM}${bar}${Colors.RESET}`);
+    this.onStatusUpdate(this.player);
   }
 
   _move(direction) {

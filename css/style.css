@@ -25,6 +25,22 @@ body {
   overflow: hidden;
 }
 
+#status-bar {
+  display: none;
+  background: #111;
+  border-bottom: 1px solid #333;
+  padding: 8px 16px;
+  font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: #00ff88;
+  letter-spacing: 0.02em;
+}
+
+#status-bar .stat {
+  margin-right: 16px;
+  white-space: nowrap;
+}
+
 #terminal {
   height: 600px;
   padding: 10px;
