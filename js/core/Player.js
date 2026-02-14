@@ -54,7 +54,11 @@ class Player {
 
   findItem(itemName) {
     const lower = itemName.toLowerCase();
-    return this.inventory.find(item => item.toLowerCase().includes(lower)) || null;
+    // Prioritet: exakt match → startsWith → includes
+    return this.inventory.find(item => item.toLowerCase() === lower)
+      || this.inventory.find(item => item.toLowerCase().startsWith(lower))
+      || this.inventory.find(item => item.toLowerCase().includes(lower))
+      || null;
   }
 
   removeItem(itemName) {
@@ -85,7 +89,7 @@ class Player {
   }
 
   addCalculator() {
-    if (this.calculators < 3) {
+    if (this.calculators < GameConstants.MAX_CALCULATORS) {
       this.calculators++;
       return true;
     }

@@ -38,6 +38,9 @@ class TerminalUI {
     this.isShortcutMode = false;
     this._resizeObserver = null;
     this._resizeTimeout = null;
+    this._history = [];
+    this._historyIndex = -1;
+    this._savedInput = '';
   }
 
   init() {
@@ -72,7 +75,10 @@ class TerminalUI {
       this.term.focus();
     } catch (e) {
       console.error('Terminal init failed:', e);
-      this.container.innerHTML = '<p style="color:red;padding:20px;">Kunde inte starta terminalen</p>';
+      const errorEl = document.createElement('p');
+      errorEl.style.cssText = 'color:red;padding:20px;';
+      errorEl.textContent = 'Kunde inte starta terminalen';
+      this.container.replaceChildren(errorEl);
     }
   }
 
@@ -96,6 +102,14 @@ class TerminalUI {
       this.term.write('\r\n');
       const command = this.inputBuffer;
       this.inputBuffer = '';
+      if (command.trim()) {
+        this._history.push(command);
+        if (this._history.length > GameConstants.MAX_HISTORY_LENGTH) {
+          this._history.shift();
+        }
+      }
+      this._historyIndex = -1;
+      this._savedInput = '';
       if (this.onCommand) this.onCommand(command);
       return;
     }
@@ -114,6 +128,17 @@ class TerminalUI {
       return;
     }
 
+    // Piltangenter (upp/ner) för kommandohistorik
+    if (data === '\x1b[A') {
+      this._navigateHistory(1);
+      return;
+    }
+    if (data === '\x1b[B') {
+      this._navigateHistory(-1);
+      return;
+    }
+
+    // Ignorera övriga escape-sekvenser
     if (data.startsWith('\x1b')) return;
 
     // Navigation shortcuts: single keypress when buffer is empty
@@ -125,10 +150,43 @@ class TerminalUI {
     }
 
     if (data >= ' ' && data.length === 1) {
-      if (this.inputBuffer.length >= 500) return;  // Max 500 chars
+      if (this.inputBuffer.length >= GameConstants.MAX_INPUT_LENGTH) return;
       this.inputBuffer += data;
       this.term.write(data);
     }
+  }
+
+  _navigateHistory(direction) {
+    if (this._history.length === 0) return;
+
+    if (this._historyIndex === -1 && direction === 1) {
+      this._savedInput = this.inputBuffer;
+      this._historyIndex = this._history.length - 1;
+    } else if (direction === 1 && this._historyIndex > 0) {
+      this._historyIndex--;
+    } else if (direction === -1) {
+      if (this._historyIndex === this._history.length - 1 || this._historyIndex === -1) {
+        this._replaceInput(this._savedInput);
+        this._historyIndex = -1;
+        return;
+      }
+      this._historyIndex++;
+    } else {
+      return;
+    }
+
+    if (this._historyIndex >= 0 && this._historyIndex < this._history.length) {
+      this._replaceInput(this._history[this._historyIndex]);
+    }
+  }
+
+  _replaceInput(newText) {
+    // Radera nuvarande input från terminalen
+    for (let i = 0; i < this.inputBuffer.length; i++) {
+      this.term.write('\b \b');
+    }
+    this.inputBuffer = newText;
+    this.term.write(newText);
   }
 
   write(text) {
@@ -162,10 +220,10 @@ function startGame() {
 
   terminal.onCommand = (name) => {
     const trimmed = name.trim();
-    if (trimmed.length > 0 && trimmed.length <= 20) {
+    if (trimmed.length > 0 && trimmed.length <= GameConstants.MAX_NAME_LENGTH) {
       initGame(trimmed);
     } else {
-      terminal.write('\n\x1b[91m  Skriv ditt namn (max 20 tecken).\x1b[0m\n');
+      terminal.write(`\n\x1b[91m  Skriv ditt namn (max ${GameConstants.MAX_NAME_LENGTH} tecken).\x1b[0m\n`);
       terminal.write('\x1b[96m  Vad heter du? \x1b[0m');
     }
   };

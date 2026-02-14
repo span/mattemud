@@ -9,26 +9,25 @@ class MathBeast {
     this.currentProblem = null;
     this.practiceProblem = null;
     this.attempts = 0;
-    this.maxAttempts = 3;
+    this.maxAttempts = GameConstants.MATHBEAST_MAX_ATTEMPTS;
   }
 
-  static INSULTS = ['klansen', 'tokansen', 'mattenissen', 'sifferansen', 'talansen'];
   static EVIL_LAUGHS = ['MUAHAHA!', 'BWAHAHA!', 'Hihihihi!', 'MWEHEHEHE!'];
   static GREETINGS = [
-    'Åh nej, DU igen! Har du FORTFARANDE inte fattat?!',
-    'STOPP! Du räknar som en potatis!',
+    'Oj oj, DU igen! Har du FORTFARANDE inte fattat?!',
+    'STOPP! Du gissar ju bara!',
     'Hahaha! Fel IGEN! Nu tar JAG över!',
-    'Suck... måste JAG lära dig ALLT?',
+    'Hmm... verkar som att JAG måste visa dig!',
   ];
   static SUCCESS_RESPONSES = [
-    'Hmmpf... det var rätt. Tur för dig!',
-    'Jaja, DEN gången gick det bra. Försvinn nu!',
+    'Hmmpf... det var rätt. Bra jobbat!',
+    'Jaja, DEN gången gick det bra. Vi ses nästa gång!',
     'Okej okej, du klarade det. Men jag VÄNTAR på nästa fel!',
   ];
   static FAILURE_RESPONSES = [
-    'FEL! Försök igen!',
-    'Nej nej NEJ! Lyssna på vad jag sa!',
-    'Fel. IGEN. Titta på exemplet!',
+    'Nej! Försök igen!',
+    'Nope! Titta på vad jag sa!',
+    'Inte riktigt. Kolla exemplet!',
   ];
 
   _choice(arr) {
@@ -36,7 +35,7 @@ class MathBeast {
   }
 
   shouldAppear(consecutiveErrors) {
-    return consecutiveErrors >= 2;
+    return consecutiveErrors >= GameConstants.MATHBEAST_APPEAR_AFTER;
   }
 
   appear(failedProblem) {
@@ -69,7 +68,7 @@ ${Colors.WHITE}${failedProblem.methodExplanation}${Colors.RESET}
 
 ${Colors.MAGENTA}════════════════════════════════════════════════════════${Colors.RESET}
 
-  ${Colors.CYAN}"Fattade du? BRA! För nu ska DU lösa en!"${Colors.RESET}
+  ${Colors.CYAN}"Fattade du? BRA! Nu ska DU lösa en!"${Colors.RESET}
 
   ${Colors.YELLOW}${Colors.BOLD}${this.practiceProblem.question}${Colors.RESET}
 `;
@@ -82,21 +81,7 @@ ${Colors.MAGENTA}═════════════════════
 
     this.attempts++;
 
-    const cleanAnswer = answer.trim().toLowerCase();
-    const correctAnswer = this.practiceProblem.answer.toLowerCase();
-
-    // Kolla om rätt
-    let isCorrect = cleanAnswer === correctAnswer ||
-      cleanAnswer.replace(/\s/g, '') === correctAnswer.replace(/\s/g, '') ||
-      cleanAnswer.replace(',', '.') === correctAnswer;
-
-    if (!isCorrect) {
-      try {
-        isCorrect = parseFloat(cleanAnswer.replace(',', '.')) === parseFloat(correctAnswer);
-      } catch {}
-    }
-
-    if (isCorrect) {
+    if (AnswerValidator.check(answer, this.practiceProblem.answer)) {
       return this._handleSuccess();
     }
     return this._handleFailure();

@@ -25,11 +25,16 @@
 
   <!-- Load game scripts -->
   <script src="../js/core/colors.js"></script>
+  <script src="../js/core/Constants.js"></script>
   <script src="../js/core/Player.js"></script>
   <script src="../js/core/World.js"></script>
   <script src="../js/core/ChallengeGenerator.js"></script>
+  <script src="../js/core/AnswerValidator.js"></script>
   <script src="../js/core/MathBeast.js"></script>
+  <script src="../js/core/ChallengeSystem.js"></script>
+  <script src="../js/core/BattleSystem.js"></script>
   <script src="../js/core/GameEngine.js"></script>
+  <script src="../js/data/worldData.js"></script>
 
   <script>
     const results = document.getElementById('results');
@@ -134,15 +139,15 @@
 
     test('genererar MathProblem', () => {
       const gen = new ChallengeGenerator();
-      const problem = gen.generate('tutorial', 1);
+      const problem = gen.generate('addition', 1);
       assertTrue(problem instanceof MathProblem);
       assertTrue(problem.question.length > 0);
     });
 
-    test('tutorial har rätt svar', () => {
+    test('addition har rätt svar', () => {
       const gen = new ChallengeGenerator();
       for (let i = 0; i < 10; i++) {
-        const p = gen.generate('tutorial', 1);
+        const p = gen.generate('addition', 1);
         const match = p.question.match(/(\d+)\s*\+\s*(\d+)/);
         if (match) {
           assertEqual(p.answer, String(parseInt(match[1]) + parseInt(match[2])));
@@ -172,6 +177,35 @@
       }
     });
 
+    // AnswerValidator Tests
+    section('AnswerValidator');
+
+    test('exakt match', () => {
+      assertTrue(AnswerValidator.check('42', '42'));
+    });
+
+    test('whitespace-tolerant', () => {
+      assertTrue(AnswerValidator.check(' 42 ', '42'));
+    });
+
+    test('komma som decimal', () => {
+      assertTrue(AnswerValidator.check('3,5', '3.5'));
+    });
+
+    test('rest-format', () => {
+      assertTrue(AnswerValidator.check('5 rest 2', '5 rest 2'));
+      assertTrue(AnswerValidator.check('5rest2', '5 rest 2'));
+    });
+
+    test('procent-format', () => {
+      assertTrue(AnswerValidator.check('50', '50%'));
+      assertTrue(AnswerValidator.check('50%', '50%'));
+    });
+
+    test('fel svar returnerar false', () => {
+      assertFalse(AnswerValidator.check('41', '42'));
+    });
+
     // MathBeast Tests
     section('MathBeast');
 
@@ -191,12 +225,196 @@
       const problem = new MathProblem({
         question: 'Test?',
         answer: '42',
-        category: 'tutorial',
+        category: 'addition',
         difficulty: 1,
         methodExplanation: 'Test'
       });
       mb.appear(problem);
       assertTrue(mb.isActive());
+    });
+
+    // World Tests
+    section('World');
+
+    test('ladda rum från data', () => {
+      const world = new World();
+      world.loadFromData(WORLD_DATA);
+      const room = world.getRoom('akademin_hall');
+      assertTrue(room !== null);
+      assertEqual(room.name, 'Trollkarlsakademins Hall');
+    });
+
+    test('getRoom returnerar null för okänt id', () => {
+      const world = new World();
+      world.loadFromData(WORLD_DATA);
+      assertEqual(world.getRoom('finns_inte'), null);
+    });
+
+    test('removeMonster tar bort monster', () => {
+      const world = new World();
+      world.loadFromData(WORLD_DATA);
+      const room = world.getRoom('akademin_port');
+      assertTrue(room.monster !== null);
+      world.removeMonster('akademin_port');
+      assertEqual(world.getRoom('akademin_port').monster, null);
+    });
+
+    test('markVisited och isVisited', () => {
+      const world = new World();
+      assertFalse(world.isVisited('akademin_hall'));
+      world.markVisited('akademin_hall');
+      assertTrue(world.isVisited('akademin_hall'));
+    });
+
+    // GameEngine Tests
+    section('GameEngine');
+
+    function createTestEngine() {
+      const world = new World();
+      world.loadFromData(WORLD_DATA);
+      const player = new Player('Testare');
+      const output = [];
+      const engine = new GameEngine(world, player, {
+        output: (text) => output.push(text),
+      });
+      return { engine, output, player, world };
+    }
+
+    test('kommandorouting: titta visar rum', () => {
+      const { engine, output } = createTestEngine();
+      engine.processCommand('titta');
+      assertTrue(output.some(line => line.includes('Trollkarlsakademin')));
+    });
+
+    test('riktningsgenvägar: n/s/ö/v', () => {
+      const { engine, player, world } = createTestEngine();
+      // Ta bort monster som blockerar i port-rummet
+      // Gå öster till övningsrummet
+      engine.processCommand('ö');
+      assertEqual(player.currentRoom, 'akademin_ovningsrum');
+    });
+
+    test('okänt kommando visar hjälpmeddelande', () => {
+      const { engine, output } = createTestEngine();
+      engine.processCommand('xyzzy');
+      assertTrue(output.some(line => line.includes('Vad sa du?')));
+    });
+
+    test('attack utan monster säger lugnt läge', () => {
+      const { engine, output } = createTestEngine();
+      engine.processCommand('attack');
+      assertTrue(output.some(line => line.includes('Inga monster')));
+    });
+
+    test('lös utan gåta säger det', () => {
+      const { engine, output } = createTestEngine();
+      // akademin_hall har ingen challenge
+      engine.processCommand('lös');
+      assertTrue(output.some(line => line.includes('ingen gåta')));
+    });
+
+    // ChallengeGenerator - extra tester
+    section('ChallengeGenerator (extra)');
+
+    test('okänd kategori faller tillbaka till addition', () => {
+      const gen = new ChallengeGenerator();
+      const p = gen.generate('nonexistent', 1);
+      assertTrue(p instanceof MathProblem);
+      assertTrue(p.question.includes('+'));
+    });
+
+    test('subtraktion har rätt svar', () => {
+      const gen = new ChallengeGenerator();
+      for (let i = 0; i < 10; i++) {
+        const p = gen.generate('subtraction', 1);
+        const match = p.question.match(/(\d+)\s*-\s*(\d+)/);
+        if (match) {
+          assertEqual(p.answer, String(parseInt(match[1]) - parseInt(match[2])));
+        }
+      }
+    });
+
+    test('division med rest har korrekt format', () => {
+      const gen = new ChallengeGenerator();
+      for (let i = 0; i < 10; i++) {
+        const p = gen.generate('division', 3);
+        assertTrue(p.answer.includes('rest'));
+        const match = p.answer.match(/(\d+) rest (\d+)/);
+        assertTrue(match !== null);
+      }
+    });
+
+    // Skuldsystem Tests
+    section('Skuldsystem');
+
+    test('addDebt och popDebt fungerar', () => {
+      const p = new Player('Test');
+      p.addDebt('addition', 1);
+      assertTrue(p.hasDebt());
+      const debt = p.popDebt();
+      assertEqual(debt.category, 'addition');
+      assertFalse(p.hasDebt());
+    });
+
+    test('skulder hanteras i FIFO-ordning', () => {
+      const p = new Player('Test');
+      p.addDebt('addition', 1);
+      p.addDebt('subtraction', 2);
+      assertEqual(p.popDebt().category, 'addition');
+      assertEqual(p.popDebt().category, 'subtraction');
+    });
+
+    test('popDebt returnerar null utan skuld', () => {
+      const p = new Player('Test');
+      assertEqual(p.popDebt(), null);
+    });
+
+    // Timer Tests
+    section('Timer');
+
+    test('getTimerSeconds minskar med level', () => {
+      const { engine } = createTestEngine();
+      engine.player.level = 1;
+      assertEqual(engine.battle.getTimerSeconds(), GameConstants.TIMER_SECONDS.EASY);
+      engine.player.level = 5;
+      assertEqual(engine.battle.getTimerSeconds(), GameConstants.TIMER_SECONDS.HARD);
+      engine.player.level = 9;
+      assertEqual(engine.battle.getTimerSeconds(), GameConstants.TIMER_SECONDS.EXPERT);
+    });
+
+    // Player findItem Tests
+    section('Player findItem');
+
+    test('findItem prioriterar exakt match', () => {
+      const p = new Player('Test');
+      p.addItem('Trolldryck');
+      p.addItem('Läkande dryck');
+      const found = p.findItem('trolldryck');
+      assertEqual(found, 'Trolldryck');
+    });
+
+    test('findItem hittar med startsWith', () => {
+      const p = new Player('Test');
+      p.addItem('Läkande dryck');
+      const found = p.findItem('läkande');
+      assertEqual(found, 'Läkande dryck');
+    });
+
+    test('findItem hittar med includes', () => {
+      const p = new Player('Test');
+      p.addItem('Gyllene Nyckel');
+      const found = p.findItem('nyckel');
+      assertEqual(found, 'Gyllene Nyckel');
+    });
+
+    // Constants Tests
+    section('Constants');
+
+    test('GameConstants finns och har korrekta värden', () => {
+      assertEqual(GameConstants.MAX_CALCULATORS, 3);
+      assertEqual(GameConstants.MAX_DEBT_ATTEMPTS, 5);
+      assertEqual(GameConstants.MATHBEAST_APPEAR_AFTER, 2);
+      assertEqual(GameConstants.TIMER_SECONDS.EASY, 45);
     });
 
     // Summary
