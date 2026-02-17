@@ -8,15 +8,6 @@ const GameConstants = {
   MATHBEAST_APPEAR_AFTER: 2,
   MATHBEAST_MAX_ATTEMPTS: 3,
 
-  // Timer (sekunder) per spelarnivå
-  TIMER_SECONDS: {
-    EASY: 45,    // level 1-2
-    MEDIUM: 40,  // level 3-4
-    HARD: 35,    // level 5-6
-    HARDER: 30,  // level 7-8
-    EXPERT: 25,  // level 9+
-  },
-
   // Belöningar
   REWARDS: {
     DEFAULT_XP: 25,

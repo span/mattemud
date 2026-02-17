@@ -24,6 +24,7 @@ class Room {
       rewardXp: data.monster.reward_xp,
       rewardGold: data.monster.reward_gold,
       defeatMessage: data.monster.defeat_message,
+      requiredWins: data.monster.required_wins || 3,
     } : null;
 
     this.challenge = data.challenge ? {
@@ -94,14 +95,15 @@ class World {
 
     if (room.monster) {
       lines.push('');
-      lines.push(`${Colors.RED}${Colors.BOLD}⚠️  ${room.monster.name} blockerar vägen!${Colors.RESET}`);
+      lines.push(`${Colors.RED}${Colors.BOLD}${room.monster.name} blockerar vägen! ⚠️${Colors.RESET}`);
       lines.push(`${Colors.RED}"${room.monster.description}"${Colors.RESET}`);
+      lines.push(`${Colors.DIM}(Skriv ${Colors.RESET}${Colors.BOLD}'attack'${Colors.RESET}${Colors.DIM} för att slåss)${Colors.RESET}`);
     }
 
     if (room.challenge) {
       lines.push('');
-      lines.push(`${Colors.MAGENTA}📜 ${room.challenge.description}${Colors.RESET}`);
-      lines.push(`${Colors.DIM}(Skriv 'lös' för att försöka)${Colors.RESET}`);
+      lines.push(`${Colors.MAGENTA}${room.challenge.description} 📜${Colors.RESET}`);
+      lines.push(`${Colors.DIM}(Skriv ${Colors.RESET}${Colors.BOLD}'lös'${Colors.RESET}${Colors.DIM} för att försöka)${Colors.RESET}`);
     }
 
     if (room.items.length > 0) {

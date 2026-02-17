@@ -305,7 +305,7 @@ function initGame(playerName) {
     onSave: (data) => Storage.save(data),
     onLoad: () => Storage.load(),
     onQuit: () => {
-      terminal.writeLine('\n👋 Tack för att du spelade!');
+      terminal.writeLine('\nTack för att du spelade! 👋');
       terminal.dispose();
     },
   });

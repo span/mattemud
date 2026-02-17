@@ -56,6 +56,16 @@ ${Colors.BG_RED}${Colors.WHITE}${Colors.BOLD}╔══════════�
 ${Colors.BG_RED}${Colors.WHITE}${Colors.BOLD}║     🔥🔥🔥 MATTEMONSTRET HAR ANLÄNT! 🔥🔥🔥          ║${Colors.RESET}
 ${Colors.BG_RED}${Colors.WHITE}${Colors.BOLD}╚═══════════════════════════════════════════════════════╝${Colors.RESET}
 
+${Colors.RED}         (       )${Colors.RESET}
+${Colors.RED}          \\     /${Colors.RESET}
+${Colors.RED}    _______\\   /________${Colors.RESET}
+${Colors.RED}   /                    \\${Colors.RESET}
+${Colors.RED}  |   ${Colors.YELLOW}x${Colors.RED}           ${Colors.YELLOW}÷${Colors.RED}      |${Colors.RESET}
+${Colors.RED}  |          ${Colors.GREEN}+${Colors.RED}            |${Colors.RESET}
+${Colors.RED}  |        ${Colors.MAGENTA}-----${Colors.RED}          |${Colors.RESET}
+${Colors.RED}   \\                    /${Colors.RESET}
+${Colors.RED}    \\__________________/${Colors.RESET}
+
   ${Colors.RED}${Colors.BOLD}${laugh}${Colors.RESET}
 
   ${Colors.CYAN}"${greeting}"${Colors.RESET}

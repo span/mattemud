@@ -185,7 +185,7 @@ class GameEngine {
       if (foundItem.toLowerCase().includes('räknedosa')) {
         if (this.player.addCalculator()) {
           this.world.removeItemFromRoom(this.player.currentRoom, foundItem);
-          this.print(`\n🔢 Du plockar upp en räknedosa! (${this.player.calculators}/3)`);
+          this.print(`\nDu plockar upp en räknedosa! (${this.player.calculators}/3) 🔢`);
           this.print(`${cyan("Skriv 'dosa' under en strid för att få hjälp!")}`);
         } else {
           this.print(`\nDu har redan max antal räknedosor (${GameConstants.MAX_CALCULATORS}/${GameConstants.MAX_CALCULATORS})!`);
@@ -202,7 +202,7 @@ class GameEngine {
 
   _showInventory() {
     if (this.player.inventory.length === 0) {
-      this.print("\n🎒 Ryggsäcken gäspar... helt tom!");
+      this.print("\nRyggsäcken gäspar... helt tom! 🎒");
       return;
     }
     this.print(`\n╔════════════════════════════╗`);
@@ -278,30 +278,28 @@ class GameEngine {
 
   _saveGame() {
     this.onSave(this.player.toJSON());
-    this.print(`\n💾 Spel sparat!`);
+    this.print(`\nSpel sparat! 💾`);
   }
 
   _loadGame() {
     const data = this.onLoad();
     if (data) {
       this.player = Player.fromJSON(data);
-      this.battle.resetTimerState();
       this.inChallengeMode = false;
       this.currentChallenge = null;
       this.mathBeast = new MathBeast();
-      this.print(`\n📂 Laddat spel: ${this.player.name}`);
+      this.print(`\nLaddat spel: ${this.player.name} 📂`);
       this.showRoom();
     } else {
-      this.print("\n❌ Inga sparade spel hittades.");
+      this.print("\nInga sparade spel hittades. ❌");
     }
   }
 
   _quit() {
-    this.battle.stopTimer();
     this.mathBeast = null;
     this.currentChallenge = null;
     this.inChallengeMode = false;
-    this.print("\n🎮 Snygg spelning! Ses nästa gång!");
+    this.print("\nSnygg spelning! Ses nästa gång! 🎮");
     this.running = false;
     this.onQuit();
   }

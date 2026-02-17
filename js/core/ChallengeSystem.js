@@ -38,8 +38,6 @@ class ChallengeSystem {
       room.challenge.difficulty
     );
 
-    // Rumsutmaningar har medvetet ingen timer (lugn inlärning)
-    this.engine.battle.resetTimerState();
     this.print(`\n${room.challenge.description}\n`);
     this.print(`  ${this.engine.currentChallenge.question}\n`);
     this.engine.inChallengeMode = true;
@@ -47,24 +45,13 @@ class ChallengeSystem {
   }
 
   handleChallengeInput(answer) {
-    const battle = this.engine.battle;
-
-    if (battle._timer.active && battle._timer.expired) {
-      this.print(`\n${boldRed('⏱️  TIDEN RANN UT!')}`);
-      battle.resetTimerState();
-      this.handleWrongAnswer();
-      return;
-    }
-
     if (!answer) {
-      const timerMsg = battle._timer.active ? ` ${cyan(`⏱️ ${battle._timer.timeLeft}s kvar`)}` : '';
-      this.print(`(Skriv ditt svar, eller 'ge upp')${timerMsg}`);
+      this.print(`(Skriv ditt svar, eller 'ge upp')`);
       return;
     }
 
     if (['ge upp', 'avbryt'].includes(answer)) {
       this.print("\nDu ger upp försöket...");
-      battle.resetTimerState();
       this.engine.inChallengeMode = false;
       this.engine.currentChallenge = null;
       return;
@@ -76,7 +63,6 @@ class ChallengeSystem {
     }
 
     if (this.checkAnswer(answer)) {
-      battle.resetTimerState();
       this.handleCorrectAnswer();
     } else {
       this.handleWrongAnswer();
@@ -91,18 +77,36 @@ class ChallengeSystem {
   handleCorrectAnswer() {
     const room = this.world.getRoom(this.player.currentRoom);
 
+    let xp = GameConstants.REWARDS.DEFAULT_XP;
+    let gold = GameConstants.REWARDS.DEFAULT_GOLD;
+
+    if (room && room.monster) {
+      const monster = room.monster;
+      const result = this.engine.battle.addBattleCorrect(monster.requiredWins);
+
+      if (!result.done) {
+        this.print(`\n  ${boldGreen(`Rätt! ${result.current} av ${result.required} ✅`)}\n`);
+
+        this.engine.currentChallenge = this.generator.generate(
+          monster.challengeCategory,
+          monster.challengeDifficulty
+        );
+        this.print(`    ${magenta(this.engine.currentChallenge.question)}\n`);
+        this.player.currentChallengeErrors = 0;
+        return;
+      }
+
+      xp = monster.rewardXp;
+      gold = monster.rewardGold;
+    }
+
     this.print(`
 ${Colors.GREEN}╔═══════════════════════════════════════╗
 ║${Colors.BOLD}${Colors.WHITE}      ⭐ BOOM! RÄTT SVAR! ⭐           ${Colors.RESET}${Colors.GREEN}║
 ╚═══════════════════════════════════════╝${Colors.RESET}
 `);
 
-    let xp = GameConstants.REWARDS.DEFAULT_XP;
-    let gold = GameConstants.REWARDS.DEFAULT_GOLD;
-
     if (room && room.monster) {
-      xp = room.monster.rewardXp;
-      gold = room.monster.rewardGold;
       this.print(`  ${cyan(room.monster.defeatMessage)}\n`);
       this.world.removeMonster(this.player.currentRoom);
     } else if (room && room.challenge) {
@@ -115,8 +119,8 @@ ${Colors.GREEN}╔════════════════════�
     this.player.addGold(gold);
     const levelUp = this.player.addXp(xp);
 
-    this.print(`  ${boldGreen(`⚡ +${xp} XP!`)}`);
-    this.print(`  ${boldYellow(`💰 +${gold} guld!`)}`);
+    this.print(`  ${boldGreen(`+${xp} XP! ⚡`)}`);
+    this.print(`  ${boldYellow(`+${gold} guld! 💰`)}`);
 
     if (levelUp) {
       this.engine.battle.showLevelUp();
@@ -126,23 +130,41 @@ ${Colors.GREEN}╔════════════════════�
     this.engine.inChallengeMode = false;
     this.engine.currentChallenge = null;
     this.player.currentChallengeErrors = 0;
+
+    // Visa rummet igen så spelaren vet vad de kan göra härnäst
+    if (room) {
+      this.print('');
+      this.print(`${Colors.DIM}Du tittar dig omkring...${Colors.RESET}`);
+      this.print(room.description);
+
+      if (room.items.length > 0) {
+        this.print('');
+        this.print(`${Colors.YELLOW}Du ser:${Colors.RESET}`);
+        for (const item of room.items) {
+          this.print(`  ${Colors.GREEN}• ${item}${Colors.RESET}`);
+        }
+      }
+
+      const exits = Object.keys(room.exits);
+      if (exits.length > 0) {
+        this.print('');
+        this.print(`${Colors.CYAN}Utgångar: ${exits.join(', ')}${Colors.RESET}`);
+      }
+    }
   }
 
   handleWrongAnswer() {
     this.player.currentChallengeErrors++;
     this.player.wrongAnswers++;
 
-    this.print(`\n  ${boldRed('❌ Nope!')}`);
+    this.print(`\n  ${boldRed('Nope! ❌')}`);
 
     if (this.engine.mathBeast.shouldAppear(this.player.currentChallengeErrors)) {
-      this.engine.battle.stopTimer();
       const message = this.engine.mathBeast.appear(this.engine.currentChallenge);
       this.print(message);
       this.engine.inChallengeMode = false;
     } else {
-      const battle = this.engine.battle;
-      const timerMsg = battle._timer.active ? ` ${cyan(`⏱️ ${battle._timer.timeLeft}s kvar`)}` : '';
-      this.print(`  ${yellow('Kom igen, du fixar detta!')}${timerMsg}`);
+      this.print(`  ${yellow('Kom igen, du fixar detta!')}`);
       if (this.engine.currentChallenge && this.engine.currentChallenge.hint) {
         this.print(`  ${cyan('Ledtråd:')} ${this.engine.currentChallenge.hint}`);
       }
@@ -168,11 +190,10 @@ ${Colors.CYAN}╔═════════════════════
 
   ${cyan(`Svaret är: ${Colors.BOLD}${challenge.answer}${Colors.RESET}`)}
 
-  ${yellow(`⚠️  Du har ${this.player.calculators} räknedos${this.player.calculators === 1 ? 'a' : 'or'} kvar.`)}
+  ${yellow(`Du har ${this.player.calculators} räknedos${this.player.calculators === 1 ? 'a' : 'or'} kvar. ⚠️`)}
   ${yellow('Du måste lösa ett liknande tal själv nästa gång!')}
 `);
 
-    this.engine.battle.resetTimerState();
     this.handleCorrectAnswer();
   }
 
@@ -224,7 +245,7 @@ ${Colors.GREEN}╔════════════════════�
 `);
 
       this.player.addXp(GameConstants.REWARDS.DEBT_XP);
-      this.print(`  ${boldGreen('⚡ +10 XP!')}\n`);
+      this.print(`  ${boldGreen('+10 XP! ⚡')}\n`);
 
       this._resumePendingAction();
     } else {
@@ -241,7 +262,7 @@ ${Colors.GREEN}╔════════════════════�
         return;
       }
 
-      this.print(`\n  ${boldRed('❌ Fel!')} Försök igen!`);
+      this.print(`\n  ${boldRed('Fel! ❌')} Försök igen!`);
       if (this.engine.currentChallenge.hint) {
         this.print(`  ${cyan('Ledtråd:')} ${this.engine.currentChallenge.hint}`);
       }

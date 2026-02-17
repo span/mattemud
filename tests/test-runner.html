@@ -369,19 +369,6 @@
       assertEqual(p.popDebt(), null);
     });
 
-    // Timer Tests
-    section('Timer');
-
-    test('getTimerSeconds minskar med level', () => {
-      const { engine } = createTestEngine();
-      engine.player.level = 1;
-      assertEqual(engine.battle.getTimerSeconds(), GameConstants.TIMER_SECONDS.EASY);
-      engine.player.level = 5;
-      assertEqual(engine.battle.getTimerSeconds(), GameConstants.TIMER_SECONDS.HARD);
-      engine.player.level = 9;
-      assertEqual(engine.battle.getTimerSeconds(), GameConstants.TIMER_SECONDS.EXPERT);
-    });
-
     // Player findItem Tests
     section('Player findItem');
 
@@ -414,7 +401,7 @@
       assertEqual(GameConstants.MAX_CALCULATORS, 3);
       assertEqual(GameConstants.MAX_DEBT_ATTEMPTS, 5);
       assertEqual(GameConstants.MATHBEAST_APPEAR_AFTER, 2);
-      assertEqual(GameConstants.TIMER_SECONDS.EASY, 45);
+      assertEqual(GameConstants.MATHBEAST_MAX_ATTEMPTS, 3);
     });
 
     // Summary

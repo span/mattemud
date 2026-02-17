@@ -15,7 +15,7 @@ const WORLD_DATA = {
       "description": "Du står i den stora hallen i Trollkarlsakademin. Facklor fladdrar på väggarna och golvet är täckt av mystiska symboler. En gammal trollkarl med långt vitt skägg står vid en pelare och ler mot dig.",
       "first_visit_text": "Välkommen, unga lärling! Jag är Mästare Numerus. För att bli en riktig trollkarl måste du lära dig talens magi. Låt oss börja med något enkelt!",
       "exits": {
-        "norr": "akademin_bibliotek",
+        "norr": "akademin_verkstad",
         "öster": "akademin_ovningsrum"
       },
       "items": [],
@@ -29,7 +29,6 @@ const WORLD_DATA = {
       "exits": {
         "väster": "akademin_hall"
       },
-      "items": ["Trollstav (låst)"],
       "challenge": {
         "id": "addition_1",
         "category": "addition",
@@ -40,14 +39,55 @@ const WORLD_DATA = {
       }
     },
     {
+      "id": "akademin_verkstad",
+      "name": "Trollkarlsverkstaden",
+      "description": "Ett stökigt rum fullt av flygande siffror och bubblande trolldrycker. Siffror studsar mot väggarna och bildar nya tal överallt.",
+      "first_visit_text": "En liten trollkarlselev tittar upp: 'Hej! Här övar vi att räkna. Passa dig för de flygande siffrorna!'",
+      "exits": {
+        "söder": "akademin_hall",
+        "norr": "akademin_provrum"
+      },
+      "challenge": {
+        "id": "addition_verkstad",
+        "category": "addition",
+        "difficulty": 1,
+        "description": "En siffra flyger rakt mot dig! Räkna snabbt för att fånga den!",
+        "reward_xp": 20,
+        "reward_gold": 10
+      }
+    },
+    {
+      "id": "akademin_provrum",
+      "name": "Provrummet",
+      "description": "En stor sal med bänkar och pulpeter. Framme vid tavlan svävar ett litet spöke gjort av glödande siffror.",
+      "first_visit_text": "Spöket fnittrar: 'Hihihi! Jag är Sifferspöket! Du måste svara rätt på mina frågor för att komma vidare!'",
+      "exits": {
+        "söder": "akademin_verkstad",
+        "norr": "akademin_bibliotek"
+      },
+      "monster": {
+        "id": "sifferspöket",
+        "name": "Sifferspöket",
+        "description": "Hihihi! Kan du räkna lika bra som mig?",
+        "ascii_art": "      .--.\n     / oo \\\n    |  <>  |\n     \\ -- /\n      |  |\n    ~~|  |~~\n   ~~ |  | ~~\n  ~~  |  |  ~~\n   ~~ ~~~~~ ~~\n    ~~     ~~",
+        "challenge_category": "addition",
+        "challenge_difficulty": 1,
+        "required_wins": 3,
+        "reward_xp": 35,
+        "reward_gold": 15,
+        "defeat_message": "Sifferspöket bleknar och fnittrar: 'Bra räknat! Jag släpper igenom dig...'"
+      }
+    },
+
+    {
       "id": "akademin_bibliotek",
       "name": "Biblioteket",
       "description": "Höga bokhyllor fyllda med magiska böcker. Damm dansar i ljuset från de höga fönstren. En liten bok lyser svagt på ett bord.",
       "exits": {
-        "söder": "akademin_hall",
+        "söder": "akademin_provrum",
+        "öster": "akademin_torn",
         "norr": "akademin_port"
       },
-      "items": ["Magisk anteckningsbok"],
       "challenge": {
         "id": "addition_2",
         "category": "addition",
@@ -57,6 +97,24 @@ const WORLD_DATA = {
         "reward_gold": 15
       }
     },
+    {
+      "id": "akademin_torn",
+      "name": "Akademins Torn",
+      "description": "Du klättrar uppför en spiraltrappa och kommer ut i ett högt torn. Härifrån ser du hela Räkneriket! Siffror dansar i vinden utanför fönstren.",
+      "first_visit_text": "Utsikten är fantastisk! Här kan du öva i lugn och ro.",
+      "exits": {
+        "väster": "akademin_bibliotek"
+      },
+      "challenge": {
+        "id": "addition_torn",
+        "category": "addition",
+        "difficulty": 2,
+        "description": "Siffror dansar utanför fönstret. Fånga dem genom att räkna rätt!",
+        "reward_xp": 25,
+        "reward_gold": 15
+      }
+    },
+
     {
       "id": "akademin_port",
       "name": "Akademins Port",
@@ -90,10 +148,10 @@ const WORLD_DATA = {
       "first_visit_text": "Du har lämnat akademin! Här börjar Tallandet, där talen lever sitt eget liv. Var försiktig!",
       "exits": {
         "söder": "akademin_port",
-        "norr": "tallandet_bro",
+        "norr": "tallandet_kulle",
         "öster": "tallandet_glanta"
       },
-      "items": ["Läkande dryck", "Guldmynt (10)", "Räknedosa"]
+      "items": []
     },
     {
       "id": "tallandet_glanta",
@@ -102,24 +160,149 @@ const WORLD_DATA = {
       "exits": {
         "väster": "tallandet_vag"
       },
-      "items": ["Guldmynt (5)"],
+      "items": [],
       "challenge": {
         "id": "addition_tiotal",
         "category": "addition",
         "difficulty": 3,
         "description": "Siffrorna vill leka! Kan du lägga ihop tiotal?",
         "reward_xp": 30,
-        "reward_gold": 20,
-        "required": false
+        "reward_gold": 20
       }
     },
+    {
+      "id": "tallandet_kulle",
+      "name": "Tiotalskullen",
+      "description": "En grön kulle med stenar staplade i grupper om tio. Härifrån ser du hela Tallandet breda ut sig.",
+      "first_visit_text": "En skylt: 'Välkommen till Tiotalskullen! Här räknar vi med STORA tal!'",
+      "exits": {
+        "söder": "tallandet_vag",
+        "norr": "tallandet_stenbro"
+      },
+      "challenge": {
+        "id": "addition_tiotal_kulle",
+        "category": "addition",
+        "difficulty": 3,
+        "description": "Stenarna på kullen vill bli ihopräknade! Kan du lägga ihop tiotal?",
+        "reward_xp": 30,
+        "reward_gold": 15
+      }
+    },
+    {
+      "id": "tallandet_stenbro",
+      "name": "Stenbron",
+      "description": "En kraftig bro av sten med siffror inristade i räcket. En väktare i rustning blockerar vägen.",
+      "first_visit_text": "Väktaren höjer sin hand: 'STOPP! Bara den som kan tiotal får passera min bro!'",
+      "exits": {
+        "söder": "tallandet_kulle",
+        "norr": "tallandet_sjo"
+      },
+      "monster": {
+        "id": "tiotalsväktaren",
+        "name": "Tiotalsväktaren",
+        "description": "Jag vaktar bron! Visa att du kan lägga ihop stora tal!",
+        "ascii_art": "      ___\n     / T \\\n    | o o |\n     \\_V_/\n    __|_|__\n   |  10   |\n   | +  +  |\n   |_______|\n     || ||\n    /|| ||\\\n   / || || \\",
+        "challenge_category": "addition",
+        "challenge_difficulty": 3,
+        "required_wins": 3,
+        "reward_xp": 45,
+        "reward_gold": 20,
+        "defeat_message": "Väktaren nickar och kliver åt sidan: 'Du kan dina tiotal. Passera!'"
+      }
+    },
+    {
+      "id": "tallandet_sjo",
+      "name": "Siffersjön",
+      "description": "En glittrande sjö där fiskar med siffror på ryggarna simmar runt i grupper om tio. Det plaskar och bubblar.",
+      "first_visit_text": "Fiskarna bildar tal när de simmar ihop! Kan du räkna ut vad de visar?",
+      "exits": {
+        "söder": "tallandet_stenbro",
+        "norr": "tallandet_fastning"
+      },
+      "challenge": {
+        "id": "addition_tiotal_sjo",
+        "category": "addition",
+        "difficulty": 3,
+        "description": "Fiskarna simmar ihop och bildar tal! Räkna ut summan!",
+        "reward_xp": 30,
+        "reward_gold": 15
+      }
+    },
+    {
+      "id": "tallandet_fastning",
+      "name": "Tiotalsfästningen",
+      "description": "En mäktig fästning byggd av stenblock med tiotals-siffror. Utanför porten sitter en stor björn och räknar på sina tassar.",
+      "first_visit_text": "Björnen morrar vänligt: 'Grrrr! Jag är Summabjörnen! Ingen kommer förbi utan att visa att de kan räkna ihop stora tal!'",
+      "exits": {
+        "söder": "tallandet_sjo",
+        "norr": "minus_stigen"
+      },
+      "monster": {
+        "id": "summabjörnen",
+        "name": "Summabjörnen",
+        "description": "GRRR! Räkna ihop mina tal om du vill komma förbi!",
+        "ascii_art": "      _____\n     / o o \\\n    |  (Y)  |\n     \\_____/\n    /|     |\\\n   / | +++ | \\\n  /  |     |  \\\n |   |     |   |\n  \\  |_____|  /\n   \\_/     \\_/",
+        "challenge_category": "addition",
+        "challenge_difficulty": 3,
+        "required_wins": 4,
+        "reward_xp": 60,
+        "reward_gold": 30,
+        "defeat_message": "Summabjörnen ger dig en kram: 'Grrr! Bra räknat, lansen! Gå vidare!'"
+      }
+    },
+
+    // ═══════════════════════════════════════════
+    // ZON 2b: MINUSLANDET (Subtraktion intro)
+    // ═══════════════════════════════════════════
+
+    {
+      "id": "minus_stigen",
+      "name": "Minusstigen",
+      "description": "En smal stig där saker sakta försvinner. Blommor tappar kronblad, träd tappar löv. Allt blir lite mindre här.",
+      "first_visit_text": "En skylt: 'Varning! Här börjar Minuslandet. Saker har en tendens att... försvinna!'",
+      "exits": {
+        "söder": "tallandet_fastning",
+        "norr": "minus_porten"
+      },
+      "challenge": {
+        "id": "subtraction_stigen",
+        "category": "subtraction",
+        "difficulty": 1,
+        "description": "Blommorna tappar kronblad! Hur många blir kvar? Räkna minus!",
+        "reward_xp": 25,
+        "reward_gold": 15
+      }
+    },
+    {
+      "id": "minus_porten",
+      "name": "Minus-grinden",
+      "description": "En rostig grind vaktas av en stor svart kråka. Kråkan har samlat siffror i ett bo ovanför grinden.",
+      "first_visit_text": "Kråkan kraaxar: 'KRAAX! Jag TAR saker! Det kallas minus! Visa att du förstår!'",
+      "exits": {
+        "söder": "minus_stigen",
+        "norr": "tallandet_bro"
+      },
+      "monster": {
+        "id": "minuskråkan",
+        "name": "Minuskråkan",
+        "description": "KRAAX! Jag tar och tar! Hur mycket blir KVAR?",
+        "ascii_art": "       ___\n      /   \\\n     | o o |\n      \\ < /\n       |||  \n     __|||__\n    /  ---  \\\n   |  /   \\  |\n   | /  -  \\ |\n    \\\\     //\n     \\\\   //\n      \\\\_//",
+        "challenge_category": "subtraction",
+        "challenge_difficulty": 1,
+        "required_wins": 3,
+        "reward_xp": 40,
+        "reward_gold": 20,
+        "defeat_message": "Kråkan flyger åt sidan: 'KRAAX! Du kan minus! Gå då...'"
+      }
+    },
+
     {
       "id": "tallandet_bro",
       "name": "Talbron",
       "description": "En bro byggd av gigantiska siffror spänner över en djup ravin. Under bron hör du ekon av bortglömda tal.",
       "first_visit_text": "En skylt varnar: 'VARNING! TROLLET KRÄVER BETALNING!'",
       "exits": {
-        "söder": "tallandet_vag",
+        "söder": "minus_porten",
         "norr": "tallandet_grottan"
       },
       "monster": {
@@ -142,7 +325,7 @@ const WORLD_DATA = {
         "söder": "tallandet_bro",
         "norr": "multi_entre"
       },
-      "items": ["Guldmynt (15)"],
+      "items": [],
       "monster": {
         "id": "taldraken",
         "name": "Taldraken",
@@ -150,6 +333,7 @@ const WORLD_DATA = {
         "ascii_art": "                 __        _\n                /  \\      // \\\n               |    \\____//   |\n               |              |\n              /   __  __  __  \\\n             |   /  \\/  \\/  \\  |\n       ^     |   \\__/\\__/\\__/  |     ^\n      / \\    |                 |    / \\\n     /   \\   |   ~~~~~~~~~~~   |   /   \\\n    | 0 0 |  |  (  RÄKNA!    ) |  | 0 0 |\n     \\ = /    \\               /    \\ = /\n      |W|      \\             /      |W|\n      |||       \\___________/       |||",
         "challenge_category": "subtraction",
         "challenge_difficulty": 3,
+        "required_wins": 4,
         "reward_xp": 70,
         "reward_gold": 35,
         "defeat_message": "Draken böjer på huvudet: 'Snyggt räknat! Du får passera.'"
@@ -169,7 +353,7 @@ const WORLD_DATA = {
         "söder": "tallandet_grottan",
         "norr": "multi_0"
       },
-      "items": ["Trolldryck", "Guldmynt (20)", "Räknedosa"]
+      "items": []
     },
 
     // --- 0:ANS TABELL: Tomhetens Trädgård ---
@@ -205,7 +389,7 @@ const WORLD_DATA = {
         "söder": "multi_0",
         "norr": "multi_2"
       },
-      "items": ["Guldmynt (10)"],
+      "items": [],
       "monster": {
         "id": "spegelansen",
         "name": "Spegelansen",
@@ -249,7 +433,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_2"
       },
-      "items": ["Guldmynt (5)"],
+      "items": [],
       "challenge": {
         "id": "multi_2_extra",
         "category": "multiplication",
@@ -278,6 +462,7 @@ const WORLD_DATA = {
         "ascii_art": "     ___\n    /   \\\n   | 5 5 |\n    \\_-_/\n   --|--\n  /  |  \\\n /  /|\\  \\\n   / | \\\n  /  |  \\\n |   |   |",
         "challenge_category": "multiplication",
         "challenge_difficulty": 5,
+        "required_wins": 4,
         "reward_xp": 55,
         "reward_gold": 25,
         "defeat_message": "Femlingen ger dig en high five: 'Snyggt! Ge mig fem!'"
@@ -290,7 +475,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_5"
       },
-      "items": ["Guldmynt (10)"],
+      "items": [],
       "challenge": {
         "id": "multi_5_extra",
         "category": "multiplication",
@@ -311,7 +496,7 @@ const WORLD_DATA = {
         "söder": "multi_5",
         "norr": "multi_3"
       },
-      "items": ["Läkande dryck"],
+      "items": [],
       "monster": {
         "id": "nollmastaren",
         "name": "Nollmästaren",
@@ -319,6 +504,7 @@ const WORLD_DATA = {
         "ascii_art": "      ___\n     / 0 \\\n    | 0 0 |\n     \\___/\n      |||\n   ___|||___\n  |  10 10  |\n  |_________|\n      |||\n     /|||\\\n    / ||| \\",
         "challenge_category": "multiplication",
         "challenge_difficulty": 10,
+        "required_wins": 5,
         "reward_xp": 55,
         "reward_gold": 25,
         "defeat_message": "Nollmästaren bugar: 'Nollan är din vän! Gå vidare!'"
@@ -342,6 +528,7 @@ const WORLD_DATA = {
         "ascii_art": "      _\n     /3\\\n    / 3 \\\n   | 3 3 |\n    \\   /\n     |3|\n    /|3|\\\n   / |3| \\\n  /  |3|  \\\n     |3|\n    /   \\",
         "challenge_category": "multiplication",
         "challenge_difficulty": 3,
+        "required_wins": 4,
         "reward_xp": 60,
         "reward_gold": 30,
         "defeat_message": "Trion klappar i alla tre händerna: 'Tredje gången gillt... du klarade det!'"
@@ -354,7 +541,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_3"
       },
-      "items": ["Guldmynt (10)"],
+      "items": [],
       "challenge": {
         "id": "multi_3_extra",
         "category": "multiplication",
@@ -383,6 +570,7 @@ const WORLD_DATA = {
         "ascii_art": "   _________\n  |         |\n  |  4 × 4  |\n  |   = ?   |\n  |  [o  o] |\n  |   \\__/  |\n  |_________|",
         "challenge_category": "multiplication",
         "challenge_difficulty": 4,
+        "required_wins": 4,
         "reward_xp": 65,
         "reward_gold": 30,
         "defeat_message": "Fyrkantansen vecklar ut sig: 'Rätt i alla fyra hörn! Bra jobbat!'"
@@ -395,7 +583,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_4"
       },
-      "items": ["Lyckosant (fyrklöver)"],
+      "items": [],
       "challenge": {
         "id": "multi_4_extra",
         "category": "multiplication",
@@ -424,6 +612,7 @@ const WORLD_DATA = {
         "ascii_art": "     / \\\n    / 6 \\\n   |     |\n   | 6 6 |\n    \\   /\n  /--\\_/--\\\n |   / \\   |\n  \\_/   \\_/\n   |     |\n   |_____|",
         "challenge_category": "multiplication",
         "challenge_difficulty": 6,
+        "required_wins": 4,
         "reward_xp": 75,
         "reward_gold": 35,
         "defeat_message": "Bidrottningen surrar nöjt: 'BZZZ! Du klarade sexans tabell! Inte illa!'"
@@ -436,7 +625,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_6"
       },
-      "items": ["Honungsburk (+20 HP)"],
+      "items": [],
       "challenge": {
         "id": "multi_6_extra",
         "category": "multiplication",
@@ -465,6 +654,7 @@ const WORLD_DATA = {
         "ascii_art": "       *\n      /|\\\n     / | \\\n    *  |  *\n   /\\  |  /\\\n  /  \\ | /  \\\n *    \\|/    *\n  \\   /|\\   /\n   \\ / | \\ /\n    *  |  *\n       *",
         "challenge_category": "multiplication",
         "challenge_difficulty": 7,
+        "required_wins": 5,
         "reward_xp": 80,
         "reward_gold": 40,
         "defeat_message": "Sjustjärnan lyser starkt: 'Alla sju stjärnor lyser för DIG!'"
@@ -477,7 +667,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_7"
       },
-      "items": ["Guldmynt (15)", "Räknedosa"],
+      "items": [],
       "challenge": {
         "id": "multi_7_extra",
         "category": "multiplication",
@@ -506,6 +696,7 @@ const WORLD_DATA = {
         "ascii_art": "    /\\  /\\\n   /  \\/  \\\n   | 8||8 |\n    \\    /\n     \\  /\n   /|||||||\\\n  / ||||||| \\\n /  ||||||| \\\n    |  |  |\n   /|  |  |\\\n  / |  |  | \\",
         "challenge_category": "multiplication",
         "challenge_difficulty": 8,
+        "required_wins": 5,
         "reward_xp": 85,
         "reward_gold": 40,
         "defeat_message": "Spindeln spinner: 'Du vann helt rättvist... eller ska jag säga 8 gånger 8 = 64? Hihihi!'"
@@ -518,7 +709,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_8"
       },
-      "items": ["Läkande dryck"],
+      "items": [],
       "challenge": {
         "id": "multi_8_extra",
         "category": "multiplication",
@@ -548,6 +739,7 @@ const WORLD_DATA = {
         "ascii_art": "       9\n      /|\\\n     / | \\\n    /  |  \\\n   9   9   9\n    \\  |  /\n     \\ | /\n    [o   o]\n     \\999/\n      |||\n     /|||\\\n    9 999 9",
         "challenge_category": "multiplication",
         "challenge_difficulty": 9,
+        "required_wins": 5,
         "reward_xp": 90,
         "reward_gold": 45,
         "defeat_message": "Niovansen svänger sina svansar: 'Nians tabell! Du är en riktig tabellmästare!'"
@@ -560,7 +752,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "multi_9"
       },
-      "items": ["Guldmynt (20)"],
+      "items": [],
       "challenge": {
         "id": "multi_9_extra",
         "category": "multiplication",
@@ -589,6 +781,7 @@ const WORLD_DATA = {
         "ascii_art": "      ___\n     /   \\\n    | × × |\n     \\___/\n    __|__\n   |  ×  |\n   | 2-9 |\n   |_____|\n    |   |\n   /|   |\\\n  / |   | \\\n /  |   |  \\",
         "challenge_category": "multiplication",
         "challenge_difficulty": 11,
+        "required_wins": 5,
         "reward_xp": 120,
         "reward_gold": 60,
         "defeat_message": "Tabellmästaren bugar djupt: 'Du KAN alla tabeller! Jag är imponerad!'"
@@ -609,7 +802,7 @@ const WORLD_DATA = {
         "öster": "division_bron",
         "norr": "division_boss"
       },
-      "items": ["Läkande dryck", "Guldmynt (25)", "Räknedosa"]
+      "items": []
     },
     {
       "id": "division_bron",
@@ -618,7 +811,7 @@ const WORLD_DATA = {
       "exits": {
         "väster": "division_entre"
       },
-      "items": ["Guldmynt (10)"],
+      "items": [],
       "challenge": {
         "id": "division_enkel",
         "category": "division",
@@ -645,6 +838,7 @@ const WORLD_DATA = {
         "ascii_art": "      ___\n     / R \\\n    | o o |\n    |  ÷  |\n     \\___/\n    __|__\n   | REST |\n   |  ?   |\n   |______|\n    |    |\n   /|    |\\\n  / |____| \\",
         "challenge_category": "division",
         "challenge_difficulty": 3,
+        "required_wins": 4,
         "reward_xp": 100,
         "reward_gold": 50,
         "defeat_message": "Resttrollet applåderar: 'Du klarade till och med resten! Snyggt jobbat!'"
@@ -663,7 +857,7 @@ const WORLD_DATA = {
       "exits": {
         "söder": "division_boss"
       },
-      "items": ["Mattetrollkarlens Diplom", "Guldmynt (100)"],
+      "items": [],
       "ascii_art": "   _______________\n  |  ___________  |\n  | |           | |\n  | |   ★   ★   | |\n  | |     +     | |\n  | |   ★   ★   | |\n  | |___________| |\n  |      [ ]      |\n  |_______O_______|"
     }
   ]
